@@ -1,0 +1,25 @@
+name: ci-sonarcloud-node
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  # Nome da job.
+  run-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          go-version: '15.x'
+      # Instala as dependências do package-lock.json
+      - run: npm ci
+      # Executa os testes e gera o arquivo coverage.out que o sonar precisa
+      - run: npm test
+      # Integração com o sonarcloud
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
